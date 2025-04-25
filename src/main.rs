@@ -43,7 +43,7 @@ fn lookup_explain(
 }
 
 #[derive(Parser)]
-#[clap(name = "ydcv", about = "A Rust version of ydcv")]
+#[clap(version, about, max_term_width = 80)]
 struct YdcvOptions {
     #[clap(short, long, help = "Generate shell completions", value_name = "SHELL")]
     generate_completion: Option<Shell>,
