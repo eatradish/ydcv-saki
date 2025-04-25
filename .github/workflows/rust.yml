@@ -2,9 +2,7 @@ name: Rust
 
 on:
   push:
-    branches: [ master ]
-  pull_request:
-    branches: [ master ]
+    branches: "*"
 
 env:
   CARGO_TERM_COLOR: always
@@ -21,8 +19,8 @@ jobs:
     - uses: hecrj/setup-rust-action@master
       with:
         rust-version: stable
-    - uses: actions/checkout@v2
-    - uses: actions/cache@v2
+    - uses: actions/checkout@v4
+    - uses: actions/cache@v4
       with:
         path: |
           ~/.cargo/registry
