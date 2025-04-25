@@ -3383,7 +3383,6 @@ dependencies = [
  "htmlescape",
  "log",
  "notify-rust",
- "rand 0.9.1",
  "reqwest",
  "rustyline",
  "scraper",
