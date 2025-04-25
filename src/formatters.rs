@@ -6,7 +6,6 @@ use notify_rust::Notification;
 #[cfg(all(feature = "notify", windows))]
 use winrt_notification::{Duration, Toast};
 
-extern crate htmlescape;
 use htmlescape::encode_minimal;
 
 macro_rules! def {

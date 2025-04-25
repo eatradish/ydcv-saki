@@ -5,7 +5,7 @@ use std::io::{IsTerminal, stdout};
 use anyhow::Result;
 #[cfg(feature = "clipboard")]
 use arboard::Clipboard;
-use clap::Parser;
+use clap::{ColorChoice, Parser};
 use reqwest::blocking::{Client, ClientBuilder};
 use rustyline::Editor;
 use rustyline::config::Builder;
@@ -57,8 +57,8 @@ struct YdcvOptions {
     #[cfg(windows)]
     #[cfg(feature = "clipboard")]
     #[clap(
-        short = 'i',
-        long = "interval",
+        short,
+        long,
         help = "time interval between selection in msec (default: 1000 on windows and 0 on others)",
         default_value = "1000"
     )]
@@ -67,46 +67,37 @@ struct YdcvOptions {
     #[cfg(unix)]
     #[cfg(feature = "clipboard")]
     #[clap(
-        short = 'i',
-        long = "interval",
+        short,
+        long,
         help = "time interval between selection in msec (default: 1000 on windows and 0 on others)",
         default_value = "0"
     )]
     interval: u64,
 
-    #[clap(short = 'H', long = "html", help = "HTML-style output")]
+    #[clap(short = 'H', long, help = "HTML-style output")]
     html: bool,
 
     #[cfg(feature = "notify")]
-    #[clap(
-        short = 'n',
-        long = "notify",
-        help = "send desktop notifications (implies -H on X11)"
-    )]
+    #[clap(short, long, help = "send desktop notifications (implies -H on X11)")]
     notify: bool,
 
     #[clap(
-        short = 'r',
-        long = "raw",
+        short,
+        long,
         help = "dump raw json reply from server",
         conflicts_with = "html",
         conflicts_with = "notify"
     )]
     raw: bool,
 
-    #[clap(
-        short = 'c',
-        long = "color",
-        help = "[auto, always, never] use color",
-        default_value = "auto"
-    )]
-    color: String,
+    #[clap(short = 'c', long = "color")]
+    color: ColorChoice,
 
     #[cfg(unix)]
     #[cfg(feature = "notify")]
     #[clap(
-        short = 't',
-        long = "timeout",
+        short,
+        long,
         help = "timeout of notification (second)",
         default_value = "30"
     )]
@@ -161,8 +152,8 @@ fn main() -> Result<()> {
             {
                 &mut plain
             }
-        } else if ydcv_options.color == "always"
-            || stdout().is_terminal() && ydcv_options.color != "never"
+        } else if ydcv_options.color == ColorChoice::Always
+            || stdout().is_terminal() && ydcv_options.color != ColorChoice::Never
         {
             &mut ansi
         } else {
@@ -193,8 +184,7 @@ fn main() -> Result<()> {
         } else {
             let mut reader = Editor::<(), FileHistory>::with_config(
                 Builder::new().auto_add_history(true).build(),
-            )
-            .unwrap();
+            )?;
 
             while let Ok(w) = reader.readline("> ") {
                 let word = w.trim();
