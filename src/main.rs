@@ -3,7 +3,8 @@
 use std::io::{IsTerminal, stdout};
 
 use anyhow::Result;
-use clap::{ColorChoice, Parser};
+use clap::{ColorChoice, CommandFactory, Parser};
+use clap_complete::{Shell, generate};
 use reqwest::blocking::{Client, ClientBuilder};
 use rustyline::Editor;
 use rustyline::config::Builder;
@@ -44,6 +45,9 @@ fn lookup_explain(
 #[derive(Parser)]
 #[clap(name = "ydcv", about = "A Rust version of ydcv")]
 struct YdcvOptions {
+    #[clap(short, long, help = "generate shell completions", value_name = "SHELL")]
+    generate_completion: Option<Shell>,
+
     #[cfg(feature = "clipboard")]
     #[clap(short = 'x', long, help = "show explanation of current selection")]
     selection: bool,
@@ -105,6 +109,11 @@ fn main() -> Result<()> {
     env_logger::init();
 
     let ydcv_options = YdcvOptions::parse();
+
+    if let Some(shell) = ydcv_options.generate_completion {
+        generate(shell, &mut YdcvOptions::command(), "ydcv", &mut stdout());
+        return Ok(());
+    }
 
     #[cfg(feature = "notify")]
     let notify_enabled = ydcv_options.notify;
