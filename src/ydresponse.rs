@@ -110,16 +110,15 @@ impl YdResponse {
             return result.join("\n");
         }
 
-        let phonetic = if let Some(ref basic) = basic {
-            if let (Some(us_phonetic), Some(uk_phonetic)) =
-                (basic.us_phonetic.as_ref(), basic.uk_phonetic.as_ref())
+        let phonetic = if let Some(basic) = basic {
+            if let (Some(us_phonetic), Some(uk_phonetic)) = (&basic.us_phonetic, &basic.uk_phonetic)
             {
                 format!(
                     " UK: [{}], US: [{}]",
                     fmt.yellow(uk_phonetic),
                     fmt.yellow(us_phonetic)
                 )
-            } else if let Some(ref phonetic) = basic.phonetic {
+            } else if let Some(phonetic) = &basic.phonetic {
                 format!("[{}]", fmt.yellow(phonetic))
             } else {
                 "".to_owned()
@@ -140,7 +139,7 @@ impl YdResponse {
             )
         ));
 
-        if let Some(ref basic) = basic {
+        if let Some(basic) = basic {
             if !basic.explains.is_empty() {
                 result.push(fmt.cyan("  Word Explanation:"));
                 for exp in &basic.explains {
@@ -149,7 +148,7 @@ impl YdResponse {
             }
         }
 
-        if let Some(ref web) = web {
+        if let Some(web) = web {
             if !web.is_empty() {
                 result.push(fmt.cyan("  Web Reference:"));
                 for item in web {
