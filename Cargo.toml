@@ -1,11 +1,11 @@
 [package]
-name = "ydcv-rs"
+name = "ydcv-2"
 description = "A rust version of YouDao Console Version"
-repository = "https://github.com/farseerfc/ydcv-rs"
+repository = "https://github.com/eatradish/ydcv-2"
 readme = "README.md"
 license = "GPL-2.0"
-version = "0.6.3"
-authors = ["Jiachen Yang <farseerfc@gmail.com>"]
+version = "0.7.0"
+authors = ["Jiachen Yang <farseerfc@gmail.com>", "sakiiily@aosc.io"]
 edition = "2021"
 
 [dependencies]
