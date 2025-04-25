@@ -2,9 +2,7 @@
 
 use anyhow::Result;
 #[cfg(feature = "clipboard")]
-use copypasta::ClipboardContext;
-#[cfg(feature = "clipboard")]
-use copypasta::ClipboardProvider;
+use arboard::Clipboard;
 use reqwest::blocking::{Client, ClientBuilder};
 use rustyline::Editor;
 use rustyline::config::Builder;
@@ -173,14 +171,14 @@ fn main() -> Result<()> {
         if selection_enabled {
             #[cfg(feature = "clipboard")]
             {
-                let mut clipboard = ClipboardContext::new().unwrap();
+                let mut clipboard = Clipboard::new()?;
                 let mut last = String::new();
 
                 println!("Waiting for selection> ");
 
                 loop {
                     std::thread::sleep(std::time::Duration::from_millis(interval));
-                    if let Ok(curr) = clipboard.get_contents() {
+                    if let Ok(curr) = clipboard.get_text() {
                         let curr = curr.trim_matches('\u{0}').trim();
                         if !curr.is_empty() && last != curr {
                             last = curr.to_owned();
