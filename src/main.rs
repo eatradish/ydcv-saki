@@ -45,7 +45,7 @@ fn lookup_explain(
 #[clap(name = "ydcv", about = "A Rust version of ydcv")]
 struct YdcvOptions {
     #[cfg(feature = "clipboard")]
-    #[clap(short = 'x', long, help = "show explaination of current selection")]
+    #[clap(short = 'x', long, help = "show explanation of current selection")]
     selection: bool,
 
     #[cfg(windows)]
