@@ -5,7 +5,7 @@ repository = "https://github.com/eatradish/ydcv-2"
 readme = "README.md"
 license = "GPL-2.0"
 version = "0.7.0"
-authors = ["Jiachen Yang <farseerfc@gmail.com>", "sakiiily@aosc.io"]
+authors = ["Jiachen Yang <farseerfc@gmail.com>", "eatradish <sakiiily@aosc.io>"]
 edition = "2024"
 
 [[bin]]
