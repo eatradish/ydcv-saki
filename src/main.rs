@@ -133,7 +133,7 @@ fn main() -> Result<()> {
     let selection_enabled = false;
 
     // reqwest will use HTTPS_PROXY env automatically
-    let mut client = ClientBuilder::new().build().unwrap();
+    let mut client = ClientBuilder::new().build()?;
 
     let mut html = HtmlFormatter::new(notify_enabled);
     let mut ansi = AnsiFormatter::new(notify_enabled);

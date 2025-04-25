@@ -145,16 +145,16 @@ impl YdResponse {
             if !web.is_empty() {
                 result.push(fmt.cyan("  Web Reference:"));
                 for item in web {
-                    result.push("     * ".to_owned() + &fmt.yellow(&item.key));
-                    result.push(
-                        "       ".to_owned()
-                            + &item
-                                .value
-                                .iter()
-                                .map(|x| fmt.purple(x))
-                                .collect::<Vec<_>>()
-                                .join("；"),
-                    );
+                    result.push(format!("     * {}", &fmt.yellow(&item.key)));
+                    result.push(format!(
+                        "       {}",
+                        &item
+                            .value
+                            .iter()
+                            .map(|x| fmt.purple(x))
+                            .collect::<Vec<_>>()
+                            .join("；")
+                    ));
                 }
             }
         }
