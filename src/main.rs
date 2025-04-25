@@ -90,7 +90,7 @@ struct YdcvOptions {
     )]
     raw: bool,
 
-    #[clap(short = 'c', long = "color")]
+    #[clap(short, long, default_value = "auto")]
     color: ColorChoice,
 
     #[cfg(unix)]
