@@ -4,7 +4,7 @@ use crate::{formatters::Formatter, lang::is_chinese};
 use anyhow::{Result, anyhow};
 use scraper::{Html, Selector, error::SelectorErrorKind};
 use serde::{Deserialize, Serialize};
-use serde_json::{self, Error as SerdeError, Value};
+use serde_json::Value;
 
 /// Basic result structure
 #[derive(Serialize, Deserialize, Debug)]
@@ -41,10 +41,6 @@ struct YdResponseInner {
 }
 
 impl YdResponse {
-    pub fn new_raw(result: String) -> Result<YdResponse, SerdeError> {
-        serde_json::from_str(&result)
-    }
-
     pub fn from_html(body: &str, word: &str) -> Result<YdResponse> {
         let html = Html::parse_document(body);
         let is_chinese = is_chinese(word);

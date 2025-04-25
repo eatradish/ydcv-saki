@@ -33,8 +33,8 @@ notify-rust =           {version = "^4.3", optional = true}
 x11-clipboard =         {version = "^0.9", optional = true}
 
 [features]
-default = [ "notify", "clipboard", "rustls" ]
-native-tls = [ "reqwest/native-tls" ]
+default = ["notify", "clipboard", "rustls"]
+native-tls = ["reqwest/native-tls"]
 notify = ["notify-rust", "winrt-notification"]
 clipboard = ["copypasta"]
 rustls = ["reqwest/rustls-tls"]

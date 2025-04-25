@@ -199,111 +199,16 @@ impl Formatter for HtmlFormatter {
 
 #[cfg(test)]
 mod tests {
-    use crate::formatters::{AnsiFormatter, HtmlFormatter, PlainFormatter};
+    use crate::formatters::HtmlFormatter;
     use crate::ydclient::*;
     use reqwest::blocking::Client;
-
-    static RAW_FELIX: &str = r#"
-    {
-        "translation":["费利克斯"],
-        "basic":{
-            "us-phonetic":"'fi:liks",
-            "phonetic":"'fi:liks",
-            "uk-phonetic":"'fi:liks",
-            "explains":["n. 菲力克斯（男子名）；费力克斯制导炸弹"]
-        },
-        "query":"Felix",
-        "errorCode":0,
-        "web":[
-            {"value":["费利克斯","费利斯","菲力克斯"],"key":"Felix"},
-            {"value":["菲利克斯·马加特","马加特","菲利斯·马加夫"],"key":"Felix Magath"},
-            {"value":["费利克斯·布洛赫","布洛赫","傅里克"],"key":"Felix Bloch"}
-        ]
-    }"#;
-
-    #[test]
-    fn test_explain_ansi() {
-        let result = format!(
-            "\n{}\n",
-            Client::new()
-                .decode_result(RAW_FELIX)
-                .unwrap()
-                .explain(&AnsiFormatter::new(false))
-        );
-        assert_eq!(
-            "
-\x1b[4mFelix\x1b[0m [\x1b[33m'fi:liks\x1b[0m] 费利克斯
-\x1b[36m  Word Explanation:\x1b[0m
-     * n. 菲力克斯（男子名）；费力克斯制导炸弹
-\x1b[36m  Web Reference:\x1b[0m
-     * \x1b[33mFelix\x1b[0m
-       \x1b[35m费利克斯\x1b[0m；\x1b[35m费利斯\x1b[0m；\x1b[35m菲力克斯\x1b[0m
-     * \x1b[33mFelix Magath\x1b[0m
-       \x1b[35m菲利克斯·马加特\x1b[0m；\x1b[35m马加特\x1b[0m；\x1b[35m菲利斯·马加夫\x1b[0m
-     * \x1b[33mFelix Bloch\x1b[0m
-       \x1b[35m费利克斯·布洛赫\x1b[0m；\x1b[35m布洛赫\x1b[0m；\x1b[35m傅里克\x1b[0m
-",
-            result
-        );
-    }
-
-    #[test]
-    fn test_explain_plain() {
-        let result = format!(
-            "\n{}\n",
-            Client::new()
-                .decode_result(RAW_FELIX)
-                .unwrap()
-                .explain(&PlainFormatter::new(false))
-        );
-        assert_eq!(
-            "
-Felix ['fi:liks] 费利克斯
-  Word Explanation:
-     * n. 菲力克斯（男子名）；费力克斯制导炸弹
-  Web Reference:
-     * Felix
-       费利克斯；费利斯；菲力克斯
-     * Felix Magath
-       菲利克斯·马加特；马加特；菲利斯·马加夫
-     * Felix Bloch
-       费利克斯·布洛赫；布洛赫；傅里克
-",
-            result
-        );
-    }
-
-    #[test]
-    fn test_explain_html_0() {
-        assert_eq!(
-            r#"
-<u>Felix</u> [<span color="goldenrod">&#x27;fi:liks</span>] 费利克斯
-<span color="navy">  Word Explanation:</span>
-     * n. 菲力克斯（男子名）；费力克斯制导炸弹
-<span color="navy">  Web Reference:</span>
-     * <span color="goldenrod">Felix</span>
-       <span color="purple">费利克斯</span>；<span color="purple">费利斯</span>；<span color="purple">菲力克斯</span>
-     * <span color="goldenrod">Felix Magath</span>
-       <span color="purple">菲利克斯·马加特</span>；<span color="purple">马加特</span>；<span color="purple">菲利斯·马加夫</span>
-     * <span color="goldenrod">Felix Bloch</span>
-       <span color="purple">费利克斯·布洛赫</span>；<span color="purple">布洛赫</span>；<span color="purple">傅里克</span>
-"#,
-            format!(
-                "\n{}\n",
-                Client::new()
-                    .decode_result(RAW_FELIX)
-                    .unwrap()
-                    .explain(&HtmlFormatter::new(false))
-            )
-        );
-    }
 
     #[test]
     fn test_explain_html_1() {
         let result = format!(
             "\n{}\n",
             Client::new()
-                .lookup_word("hakunamatata", false)
+                .lookup_word("hakunamatata")
                 .unwrap()
                 .explain(&HtmlFormatter::new(false))
         );
@@ -320,7 +225,7 @@ Felix ['fi:liks] 费利克斯
         let result = format!(
             "\n{}\n",
             Client::new()
-                .lookup_word("comment", false)
+                .lookup_word("comment")
                 .unwrap()
                 .explain(&HtmlFormatter::new(false))
         );
@@ -348,7 +253,7 @@ Felix ['fi:liks] 费利克斯
         let result = format!(
             "\n{}\n",
             Client::new()
-                .lookup_word("暂时", false)
+                .lookup_word("暂时")
                 .unwrap()
                 .explain(&HtmlFormatter::new(false))
         );

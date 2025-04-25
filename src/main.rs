@@ -1,5 +1,6 @@
 //! main module of ydcv-rs
 
+use anyhow::Result;
 #[cfg(feature = "clipboard")]
 use copypasta::ClipboardContext;
 #[cfg(feature = "clipboard")]
@@ -21,14 +22,16 @@ use crate::formatters::WinFormatter;
 use crate::formatters::{AnsiFormatter, Formatter, HtmlFormatter, PlainFormatter};
 use crate::ydclient::YdClient;
 
-fn lookup_explain(client: &mut Client, word: &str, fmt: &mut dyn Formatter, raw: bool) {
+fn lookup_explain(
+    client: &mut Client,
+    word: &str,
+    fmt: &mut dyn Formatter,
+    raw: bool,
+) -> Result<()> {
     if raw {
-        println!(
-            "{}",
-            serde_json::to_string(&client.lookup_word(word, true).unwrap()).unwrap()
-        );
+        println!("{}", serde_json::to_string(&client.lookup_word(word)?)?);
     } else {
-        match client.lookup_word(word, false) {
+        match client.lookup_word(word) {
             Ok(ref result) => {
                 let exp = result.explain(fmt);
                 fmt.print(word, &exp);
@@ -36,6 +39,8 @@ fn lookup_explain(client: &mut Client, word: &str, fmt: &mut dyn Formatter, raw:
             Err(err) => fmt.print(word, &format!("Error looking-up word {}: {:?}", word, err)),
         }
     }
+
+    Ok(())
 }
 
 #[derive(StructOpt)]
@@ -111,7 +116,7 @@ struct YdcvOptions {
     free: Vec<String>,
 }
 
-fn main() {
+fn main() -> Result<()> {
     env_logger::init();
 
     let ydcv_options = YdcvOptions::from_args();
@@ -179,7 +184,7 @@ fn main() {
                         let curr = curr.trim_matches('\u{0}').trim();
                         if !curr.is_empty() && last != curr {
                             last = curr.to_owned();
-                            lookup_explain(&mut client, curr, fmt, ydcv_options.raw);
+                            lookup_explain(&mut client, curr, fmt, ydcv_options.raw)?;
                             println!("Waiting for selection> ");
                         }
                     }
@@ -194,13 +199,15 @@ fn main() {
             while let Ok(w) = reader.readline("> ") {
                 let word = w.trim();
                 if !word.is_empty() {
-                    lookup_explain(&mut client, word, fmt, ydcv_options.raw);
+                    lookup_explain(&mut client, word, fmt, ydcv_options.raw)?;
                 }
             }
         }
     } else {
         for word in ydcv_options.free {
-            lookup_explain(&mut client, word.trim(), fmt, ydcv_options.raw);
+            lookup_explain(&mut client, word.trim(), fmt, ydcv_options.raw)?;
         }
     }
+
+    Ok(())
 }
