@@ -45,11 +45,11 @@ fn lookup_explain(
 #[derive(Parser)]
 #[clap(name = "ydcv", about = "A Rust version of ydcv")]
 struct YdcvOptions {
-    #[clap(short, long, help = "generate shell completions", value_name = "SHELL")]
+    #[clap(short, long, help = "Generate shell completions", value_name = "SHELL")]
     generate_completion: Option<Shell>,
 
     #[cfg(feature = "clipboard")]
-    #[clap(short = 'x', long, help = "show explanation of current selection")]
+    #[clap(short = 'x', long, help = "Show explanation of current selection")]
     selection: bool,
 
     #[cfg(windows)]
@@ -57,7 +57,7 @@ struct YdcvOptions {
     #[clap(
         short,
         long,
-        help = "time interval between selection in msec (default: 1000 on windows and 0 on others)",
+        help = "Time interval between selection in msec (default: 1000 on windows and 0 on others)",
         default_value = "1000"
     )]
     interval: u64,
@@ -67,7 +67,7 @@ struct YdcvOptions {
     #[clap(
         short,
         long,
-        help = "time interval between selection in msec (default: 1000 on windows and 0 on others)",
+        help = "Time interval between selection in msec (default: 1000 on windows and 0 on others)",
         default_value = "0"
     )]
     interval: u64,
@@ -76,13 +76,13 @@ struct YdcvOptions {
     html: bool,
 
     #[cfg(feature = "notify")]
-    #[clap(short, long, help = "send desktop notifications (implies -H on X11)")]
+    #[clap(short, long, help = "Send desktop notifications (implies -H on X11)")]
     notify: bool,
 
     #[clap(
         short,
         long,
-        help = "dump raw json reply from server",
+        help = "Dump raw json reply from server",
         conflicts_with = "html",
         conflicts_with = "notify"
     )]
@@ -96,7 +96,7 @@ struct YdcvOptions {
     #[clap(
         short,
         long,
-        help = "timeout of notification (second)",
+        help = "Timeout of notification (second)",
         default_value = "30"
     )]
     timeout: i32,
