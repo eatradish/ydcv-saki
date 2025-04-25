@@ -23,7 +23,6 @@ pub trait YdClient {
 
 /// Implement wrapper client trait on `reqwest::Client`
 impl YdClient for Client {
-
     #[cfg(all(not(feature = "native-tls"), not(feature = "rustls")))]
     fn lookup_word(&mut self, word: &str, raw: bool) -> Result<YdResponse> {
         panic!("https access has been disabled in this build of ydcv-rs");

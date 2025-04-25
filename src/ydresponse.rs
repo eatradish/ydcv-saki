@@ -316,7 +316,8 @@ impl YdResponse {
         }
 
         let resp = YdResponseInner {
-            translation: translations.first()
+            translation: translations
+                .first()
                 .and_then(|x| x.split('，').next())
                 .or(translations.first().map(|x| x.as_str()))
                 .map(|x| vec![x.to_string()]),
