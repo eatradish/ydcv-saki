@@ -1,6 +1,7 @@
 //! parser for the returned result from YD
 
 use crate::{formatters::Formatter, lang::is_chinese};
+use anyhow::{Result, anyhow};
 use scraper::{Html, Selector, error::SelectorErrorKind};
 use serde::{Deserialize, Serialize};
 use serde_json::{self, Error as SerdeError, Value};
@@ -44,11 +45,11 @@ impl YdResponse {
         serde_json::from_str(&result)
     }
 
-    pub fn from_html(body: &str, word: &str) -> Result<YdResponse, String> {
+    pub fn from_html(body: &str, word: &str) -> Result<YdResponse> {
         let html = Html::parse_document(body);
         let is_chinese = is_chinese(word);
 
-        let no_data = Selector::parse(".no-data-prompt").map_err(|e| e.to_string())?;
+        let no_data = Selector::parse(".no-data-prompt").map_err(|e| anyhow!("{e}"))?;
         let mut is_no_data = false;
         html.select(&no_data).for_each(|x| {
             x.text().for_each(|_| {
@@ -72,12 +73,8 @@ impl YdResponse {
             Self::zh2en(&html)
         } else {
             Self::en2zh(&html)
-        };
-
-        let res = match res {
-            Ok(res) => res,
-            Err(e) => return Err(e.to_string()),
-        };
+        }
+        .map_err(|e| anyhow!("{e}"))?;
 
         Ok(YdResponse {
             query: word.to_string(),

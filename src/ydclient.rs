@@ -2,6 +2,7 @@
 
 use super::ydresponse::YdResponse;
 use crate::lang::is_chinese;
+use anyhow::Result;
 use log::debug;
 use md5::{Digest, Md5};
 use once_cell::sync::Lazy;
@@ -9,7 +10,6 @@ use rand::{Rng, rng};
 use reqwest::Url;
 use reqwest::blocking::Client;
 use reqwest::header::{REFERER, USER_AGENT};
-use serde_json::{self, Error as SerdeError};
 use std::env::var;
 use std::error::Error;
 use std::fmt::{self, Debug};
@@ -62,13 +62,13 @@ pub trait YdClient {
     /// assert_eq!("YdResponse('hello')",
     ///        format!("{}", Client::new().lookup_word("hello").unwrap()));
     /// ```
-    fn lookup_word(&mut self, word: &str, raw: bool) -> Result<YdResponse, Box<dyn Error>>;
-    fn decode_result(&mut self, result: &str) -> Result<YdResponse, SerdeError>;
+    fn lookup_word(&mut self, word: &str, raw: bool) -> Result<YdResponse>;
+    fn decode_result(&mut self, result: &str) -> Result<YdResponse>;
 }
 
 /// Implement wrapper client trait on `reqwest::Client`
 impl YdClient for Client {
-    fn decode_result(&mut self, result: &str) -> Result<YdResponse, SerdeError> {
+    fn decode_result(&mut self, result: &str) -> Result<YdResponse> {
         let pretty_json = serde_json::from_str::<YdResponse>(result)
             .and_then(|v| serde_json::to_string_pretty(&v));
         debug!(
@@ -78,27 +78,28 @@ impl YdClient for Client {
                 Err(_) => result.to_owned(),
             }
         );
-        serde_json::from_str(result)
+        Ok(serde_json::from_str(result)?)
     }
 
     #[cfg(all(not(feature = "native-tls"), not(feature = "rustls")))]
-    fn lookup_word(&mut self, word: &str, raw: bool) -> Result<YdResponse, Box<dyn Error>> {
+    fn lookup_word(&mut self, word: &str, raw: bool) -> Result<YdResponse> {
         panic!("https access has been disabled in this build of ydcv-rs");
     }
 
     /// lookup a word on YD and returns a `YdResponse`
     #[cfg(any(feature = "native-tls", feature = "rustls"))]
-    fn lookup_word(&mut self, word: &str, raw: bool) -> Result<YdResponse, Box<dyn Error>> {
+    fn lookup_word(&mut self, word: &str, raw: bool) -> Result<YdResponse> {
+        use anyhow::bail;
+
         let body = lookup_word(word, self);
 
         if let Err(old_api_err) = body {
             let body = lookup_word_new_api(word, self);
 
             if let Err(new_api_err) = body {
-                return Err(Box::new(YdClientErr::NewAndOldAPIError(
-                    new_api_err.to_string(),
-                    old_api_err.to_string(),
-                )));
+                bail!(
+                    "New API value Error! Please make sure YD_NEW_APP_KEY and YD_NEW_APP_SEC Environment Variables is set!"
+                );
             }
 
             let body = body.unwrap();
@@ -109,14 +110,14 @@ impl YdClient for Client {
                 self.decode_result(&body).map_err(Into::into)
             }
         } else {
-            let body = body?;
+            let body = body.unwrap();
 
-            YdResponse::from_html(&body, word).map_err(Into::into)
+            Ok(YdResponse::from_html(&body, word)?)
         }
     }
 }
 
-fn lookup_word(word: &str, client: &Client) -> Result<String, Box<dyn Error>> {
+fn lookup_word(word: &str, client: &Client) -> Result<String> {
     let url = api(
         "https://www.youdao.com/result",
         &[("word", word), ("lang", "en")],
@@ -136,14 +137,14 @@ fn lookup_word(word: &str, client: &Client) -> Result<String, Box<dyn Error>> {
     Ok(body)
 }
 
-fn lookup_word_new_api(word: &str, client: &Client) -> Result<String, Box<dyn Error>> {
+fn lookup_word_new_api(word: &str, client: &Client) -> Result<String> {
     let (new_api_key, new_app_sec) =
         if let (Some(new_api_key), Some(new_app_sec)) = (NEW_API_KEY, NEW_APP_SEC) {
             (new_api_key, new_app_sec)
         } else if NEW_API_KEY_RT.as_str() != "ydcv-rs" && NEW_APP_SEC_RT.as_str() != "ydcv-rs" {
             (NEW_API_KEY_RT.as_str(), NEW_APP_SEC_RT.as_str())
         } else {
-            return Err(Box::new(YdClientErr::NewApiValueError));
+            todo!()
         };
 
     let to = get_translation_lang(word);
@@ -172,7 +173,7 @@ fn lookup_word_new_api(word: &str, client: &Client) -> Result<String, Box<dyn Er
     Ok(body)
 }
 
-fn api(url: &str, query: &[(&str, &str)]) -> Result<Url, Box<dyn Error>> {
+fn api(url: &str, query: &[(&str, &str)]) -> Result<Url> {
     let mut url = Url::parse(url)?;
     url.query_pairs_mut().extend_pairs(query.iter());
 
