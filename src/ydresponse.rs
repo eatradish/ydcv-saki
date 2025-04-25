@@ -99,7 +99,7 @@ impl YdResponse {
         if basic.is_none() && web.is_none() {
             result.push(fmt.underline(&self.query));
             result.push(fmt.cyan("  Translation:"));
-            result.push("    ".to_owned() + &translation.as_ref().unwrap().join("；"));
+            result.push(format!("    {}", &translation.as_ref().unwrap().join("；")));
             return result.join("\n");
         }
 
@@ -111,13 +111,14 @@ impl YdResponse {
                     fmt.yellow(uk_phonetic),
                     fmt.yellow(us_phonetic)
                 )
+                .into()
             } else if let Some(phonetic) = &basic.phonetic {
-                format!("[{}]", fmt.yellow(phonetic))
+                format!("[{}]", fmt.yellow(phonetic)).into()
             } else {
-                "".to_owned()
+                Cow::Borrowed("")
             }
         } else {
-            "".to_owned()
+            Cow::Borrowed("")
         };
 
         result.push(format!(
@@ -136,7 +137,7 @@ impl YdResponse {
             if !basic.explains.is_empty() {
                 result.push(fmt.cyan("  Word Explanation:"));
                 for exp in &basic.explains {
-                    result.push(fmt.default(&("     * ".to_owned() + exp)));
+                    result.push(fmt.default(&format!("     * {}", exp)));
                 }
             }
         }
@@ -339,6 +340,7 @@ impl YdResponse {
 
 // For testing
 
+use std::borrow::Cow;
 #[cfg(test)]
 use std::fmt;
 
