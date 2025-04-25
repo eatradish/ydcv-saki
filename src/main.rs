@@ -1,5 +1,7 @@
 //! main module of ydcv-rs
 
+use std::io::{IsTerminal, stdout};
+
 use anyhow::Result;
 #[cfg(feature = "clipboard")]
 use arboard::Clipboard;
@@ -160,7 +162,7 @@ fn main() -> Result<()> {
                 &mut plain
             }
         } else if ydcv_options.color == "always"
-            || atty::is(atty::Stream::Stdout) && ydcv_options.color != "never"
+            || stdout().is_terminal() && ydcv_options.color != "never"
         {
             &mut ansi
         } else {
