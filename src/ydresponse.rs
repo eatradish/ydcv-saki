@@ -217,7 +217,7 @@ impl YdResponse {
         }
 
         let resp = YdResponseInner {
-            translation: translations.get(0).map(|x| vec![x.to_string()]),
+            translation: translations.first().map(|x| vec![x.to_string()]),
             basic: Some(YdBasic {
                 explains,
                 phonetic: Some(phonetic),
@@ -316,17 +316,16 @@ impl YdResponse {
         }
 
         let resp = YdResponseInner {
-            translation: translations
-                .get(0)
+            translation: translations.first()
                 .and_then(|x| x.split('，').next())
-                .or(translations.get(0).map(|x| x.as_str()))
+                .or(translations.first().map(|x| x.as_str()))
                 .map(|x| vec![x.to_string()]),
             basic: Some(YdBasic {
                 explains: translations_format,
                 phonetic: us_phonetic
                     .clone()
                     .or(uk_phonetic.clone())
-                    .or(per_phone.get(0).map(|x| x.to_string())),
+                    .or(per_phone.first().map(|x| x.to_string())),
                 us_phonetic,
                 uk_phonetic,
             }),
