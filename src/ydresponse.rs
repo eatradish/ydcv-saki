@@ -1,7 +1,7 @@
 //! parser for the returned result from YD
 
 use crate::{formatters::Formatter, lang::is_chinese};
-use scraper::{error::SelectorErrorKind, Html, Selector};
+use scraper::{Html, Selector, error::SelectorErrorKind};
 use serde::{Deserialize, Serialize};
 use serde_json::{self, Error as SerdeError, Value};
 

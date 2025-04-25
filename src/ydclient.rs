@@ -5,10 +5,10 @@ use crate::lang::is_chinese;
 use log::debug;
 use md5::{Digest, Md5};
 use once_cell::sync::Lazy;
-use rand::{rng, Rng};
+use rand::{Rng, rng};
+use reqwest::Url;
 use reqwest::blocking::Client;
 use reqwest::header::{REFERER, USER_AGENT};
-use reqwest::Url;
 use serde_json::{self, Error as SerdeError};
 use std::env::var;
 use std::error::Error;
@@ -36,9 +36,14 @@ impl fmt::Display for YdClientErr {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             // If both the old api and the new api fail to access, this error is returned
-            YdClientErr::NewAndOldAPIError(new_api_err, old_api_err) => write!(f, "{}\n{}", old_api_err, new_api_err),
+            YdClientErr::NewAndOldAPIError(new_api_err, old_api_err) => {
+                write!(f, "{}\n{}", old_api_err, new_api_err)
+            }
             // The error returned by not finding the variables YD_NEW_APP_KEY and YD_NEW_APP_SEC
-            YdClientErr::NewApiValueError => write!(f, "New API value Error! Please make sure YD_NEW_APP_KEY and YD_NEW_APP_SEC Environment Variables is set!"),
+            YdClientErr::NewApiValueError => write!(
+                f,
+                "New API value Error! Please make sure YD_NEW_APP_KEY and YD_NEW_APP_SEC Environment Variables is set!"
+            ),
         }
     }
 }
@@ -196,11 +201,7 @@ fn get_salt() -> String {
 fn get_translation_lang(word: &str) -> &str {
     let word_is_chinese = is_chinese(word);
 
-    if word_is_chinese {
-        "EN"
-    } else {
-        "zh-CHS"
-    }
+    if word_is_chinese { "EN" } else { "zh-CHS" }
 }
 
 #[cfg(test)]

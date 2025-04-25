@@ -5,9 +5,9 @@ use copypasta::ClipboardContext;
 #[cfg(feature = "clipboard")]
 use copypasta::ClipboardProvider;
 use reqwest::blocking::{Client, ClientBuilder};
+use rustyline::Editor;
 use rustyline::config::Builder;
 use rustyline::history::FileHistory;
-use rustyline::Editor;
 use structopt::StructOpt;
 
 mod formatters;
