@@ -3,11 +3,11 @@
 use anyhow::Result;
 #[cfg(feature = "clipboard")]
 use arboard::Clipboard;
+use clap::Parser;
 use reqwest::blocking::{Client, ClientBuilder};
 use rustyline::Editor;
 use rustyline::config::Builder;
 use rustyline::history::FileHistory;
-use structopt::StructOpt;
 
 mod formatters;
 mod lang;
@@ -41,12 +41,12 @@ fn lookup_explain(
     Ok(())
 }
 
-#[derive(StructOpt)]
-#[structopt(name = "ydcv", about = "A Rust version of ydcv")]
+#[derive(Parser)]
+#[clap(name = "ydcv", about = "A Rust version of ydcv")]
 struct YdcvOptions {
     #[cfg(feature = "clipboard")]
-    #[structopt(
-        short = "x",
+    #[clap(
+        short = 'x',
         long = "selection",
         help = "show explaination of current selection"
     )]
@@ -54,8 +54,8 @@ struct YdcvOptions {
 
     #[cfg(windows)]
     #[cfg(feature = "clipboard")]
-    #[structopt(
-        short = "i",
+    #[clap(
+        short = 'i',
         long = "interval",
         help = "time interval between selection in msec (default: 1000 on windows and 0 on others)",
         default_value = "1000"
@@ -64,27 +64,27 @@ struct YdcvOptions {
 
     #[cfg(unix)]
     #[cfg(feature = "clipboard")]
-    #[structopt(
-        short = "i",
+    #[clap(
+        short = 'i',
         long = "interval",
         help = "time interval between selection in msec (default: 1000 on windows and 0 on others)",
         default_value = "0"
     )]
     interval: u64,
 
-    #[structopt(short = "H", long = "html", help = "HTML-style output")]
+    #[clap(short = 'H', long = "html", help = "HTML-style output")]
     html: bool,
 
     #[cfg(feature = "notify")]
-    #[structopt(
-        short = "n",
+    #[clap(
+        short = 'n',
         long = "notify",
         help = "send desktop notifications (implies -H on X11)"
     )]
     notify: bool,
 
-    #[structopt(
-        short = "r",
+    #[clap(
+        short = 'r',
         long = "raw",
         help = "dump raw json reply from server",
         conflicts_with = "html",
@@ -92,8 +92,8 @@ struct YdcvOptions {
     )]
     raw: bool,
 
-    #[structopt(
-        short = "c",
+    #[clap(
+        short = 'c',
         long = "color",
         help = "[auto, always, never] use color",
         default_value = "auto"
@@ -102,22 +102,22 @@ struct YdcvOptions {
 
     #[cfg(unix)]
     #[cfg(feature = "notify")]
-    #[structopt(
-        short = "t",
+    #[clap(
+        short = 't',
         long = "timeout",
         help = "timeout of notification (second)",
         default_value = "30"
     )]
     timeout: i32,
 
-    #[structopt(value_name = "WORDS")]
+    #[clap(value_name = "WORDS", help = "Words to lookup")]
     free: Vec<String>,
 }
 
 fn main() -> Result<()> {
     env_logger::init();
 
-    let ydcv_options = YdcvOptions::from_args();
+    let ydcv_options = YdcvOptions::parse();
 
     #[cfg(feature = "notify")]
     let notify_enabled = ydcv_options.notify;
