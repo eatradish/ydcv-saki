@@ -5,7 +5,7 @@ use crate::lang::is_chinese;
 use log::debug;
 use md5::{Digest, Md5};
 use once_cell::sync::Lazy;
-use rand::{thread_rng, Rng};
+use rand::{rng, Rng};
 use reqwest::blocking::Client;
 use reqwest::header::{REFERER, USER_AGENT};
 use reqwest::Url;
@@ -187,8 +187,8 @@ fn get_sign(api_key: &str, word: &str, salt: &str, app_sec: &str) -> String {
 }
 
 fn get_salt() -> String {
-    let mut rng = thread_rng();
-    let rand_int = rng.gen_range(1..65536);
+    let mut rng = rng();
+    let rand_int = rng.random_range(1..65536);
 
     rand_int.to_string()
 }
