@@ -3,8 +3,6 @@
 use std::io::{IsTerminal, stdout};
 
 use anyhow::Result;
-#[cfg(feature = "clipboard")]
-use arboard::Clipboard;
 use clap::{ColorChoice, Parser};
 use reqwest::blocking::{Client, ClientBuilder};
 use rustyline::Editor;
@@ -47,11 +45,7 @@ fn lookup_explain(
 #[clap(name = "ydcv", about = "A Rust version of ydcv")]
 struct YdcvOptions {
     #[cfg(feature = "clipboard")]
-    #[clap(
-        short = 'x',
-        long = "selection",
-        help = "show explaination of current selection"
-    )]
+    #[clap(short = 'x', long, help = "show explaination of current selection")]
     selection: bool,
 
     #[cfg(windows)]
@@ -164,7 +158,7 @@ fn main() -> Result<()> {
         if selection_enabled {
             #[cfg(feature = "clipboard")]
             {
-                let mut clipboard = Clipboard::new()?;
+                let mut clipboard = arboard::Clipboard::new()?;
                 let mut last = String::new();
 
                 println!("Waiting for selection> ");
