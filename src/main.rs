@@ -1,10 +1,13 @@
 //! main module of ydcv-rs
 
+use std::fs::create_dir_all;
 use std::io::{IsTerminal, stdout};
 
-use anyhow::Result;
+use anyhow::{Context, Result};
 use clap::{ColorChoice, CommandFactory, Parser};
 use clap_complete::{Shell, generate};
+use dirs::cache_dir;
+use log::warn;
 use reqwest::blocking::{Client, ClientBuilder};
 use rustyline::Editor;
 use rustyline::config::Builder;
@@ -185,15 +188,35 @@ fn main() -> Result<()> {
                 }
             }
         } else {
+            let history_path = cache_dir()
+                .context("Failed to get cache dir path")?
+                .join("ydcv")
+                .join("history");
+            let history_parent = history_path.parent().unwrap();
+            if !history_parent.exists() {
+                create_dir_all(history_parent)?;
+            }
+
             let mut reader = Editor::<(), FileHistory>::with_config(
                 Builder::new().auto_add_history(true).build(),
             )?;
+
+            if history_path.is_file() {
+                reader
+                    .load_history(&history_path)
+                    .inspect_err(|e| warn!("Failed to load ydcv lookup history: {e}"))
+                    .ok();
+            }
 
             while let Ok(w) = reader.readline("> ") {
                 let word = w.trim();
                 if !word.is_empty() {
                     lookup_explain(&mut client, word, fmt, ydcv_options.raw)?;
                 }
+                reader
+                    .save_history(&history_path)
+                    .inspect_err(|e| warn!("Failed to load ydcv lookup history: {e}"))
+                    .ok();
             }
         }
     } else {
