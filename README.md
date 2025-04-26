@@ -15,7 +15,7 @@ ydcv-saki 是一款有道词典命令行客户端，由 Farseerfc 老师的 [ydc
 
 ## 安装
 
-可通过 [Release 页面](https://github.com/ydcv-saki/releases) 来下载相应的二进制。也可以使用 `cargo` 来安装 `ydcv-saki`:
+可通过 [Release 页面](https://github.com/eatradish/ydcv-saki/releases) 来下载相应的二进制。也可以使用 `cargo` 来安装 `ydcv-saki`:
 
 ```bash
 cargo install ydcv-saki
