@@ -4,7 +4,7 @@ use crate::{formatters::Formatter, lang::is_chinese};
 use anyhow::{Result, anyhow};
 use scraper::{Html, Selector, error::SelectorErrorKind};
 use serde::{Deserialize, Serialize};
-use serde_json::Value;
+use std::borrow::Cow;
 
 /// Basic result structure
 #[derive(Serialize, Deserialize, Debug)]
@@ -27,21 +27,20 @@ pub struct YdWeb {
 #[serde(rename_all = "camelCase")]
 pub struct YdResponse {
     query: String,
-    error_code: Value,
     #[serde(flatten)]
-    inner: YdResponseInner,
+    inner: Option<YdResponseInner>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 struct YdResponseInner {
-    translation: Option<Vec<String>>,
-    basic: Option<YdBasic>,
-    web: Option<Vec<YdWeb>>,
+    translation: Vec<String>,
+    basic: YdBasic,
+    web: Vec<YdWeb>,
 }
 
 impl YdResponse {
-    pub fn from_html(body: &str, word: &str) -> Result<YdResponse> {
+    pub fn from_html(body: &str, word: &str) -> Result<Self> {
         let html = Html::parse_document(body);
         let is_chinese = is_chinese(word);
 
@@ -56,12 +55,7 @@ impl YdResponse {
         if is_no_data {
             return Ok(YdResponse {
                 query: word.to_string(),
-                error_code: 1.into(),
-                inner: YdResponseInner {
-                    translation: None,
-                    basic: None,
-                    web: None,
-                },
+                inner: None,
             });
         }
 
@@ -74,8 +68,7 @@ impl YdResponse {
 
         Ok(YdResponse {
             query: word.to_string(),
-            error_code: 0.into(),
-            inner: res,
+            inner: Some(res),
         })
     }
 
@@ -83,80 +76,67 @@ impl YdResponse {
     pub fn explain(&self, fmt: &dyn Formatter) -> String {
         let mut result: Vec<String> = vec![];
 
-        let YdResponseInner {
-            translation,
-            basic,
-            web,
-        } = &self.inner;
+        match &self.inner {
+            Some(YdResponseInner {
+                translation,
+                basic,
+                web,
+            }) => {
+                if web.is_empty() {
+                    result.push(fmt.underline(&self.query));
+                    result.push(fmt.cyan("  Translation:"));
+                    result.push(format!("    {}", translation.join("；")));
+                    return result.join("\n");
+                }
 
-        if self.error_code != "0" && self.error_code != 0
-            || basic.is_none() && web.is_none() && translation.is_none()
-        {
-            result.push(fmt.red(" -- No result for this query."));
-            return result.join("\n");
-        }
+                let phonetic = if let (Some(us_phonetic), Some(uk_phonetic)) =
+                    (&basic.us_phonetic, &basic.uk_phonetic)
+                {
+                    format!(
+                        " UK: [{}], US: [{}]",
+                        fmt.yellow(uk_phonetic),
+                        fmt.yellow(us_phonetic)
+                    )
+                    .into()
+                } else if let Some(phonetic) = &basic.phonetic {
+                    format!("[{}]", fmt.yellow(phonetic)).into()
+                } else {
+                    Cow::Borrowed("")
+                };
 
-        if basic.is_none() && web.is_none() {
-            result.push(fmt.underline(&self.query));
-            result.push(fmt.cyan("  Translation:"));
-            result.push(format!("    {}", &translation.as_ref().unwrap().join("；")));
-            return result.join("\n");
-        }
+                result.push(format!(
+                    "{} {} {}",
+                    fmt.underline(&self.query),
+                    phonetic,
+                    fmt.default(&translation.join("; "))
+                ));
 
-        let phonetic = if let Some(basic) = basic {
-            if let (Some(us_phonetic), Some(uk_phonetic)) = (&basic.us_phonetic, &basic.uk_phonetic)
-            {
-                format!(
-                    " UK: [{}], US: [{}]",
-                    fmt.yellow(uk_phonetic),
-                    fmt.yellow(us_phonetic)
-                )
-                .into()
-            } else if let Some(phonetic) = &basic.phonetic {
-                format!("[{}]", fmt.yellow(phonetic)).into()
-            } else {
-                Cow::Borrowed("")
-            }
-        } else {
-            Cow::Borrowed("")
-        };
+                if !basic.explains.is_empty() {
+                    result.push(fmt.cyan("  Word Explanation:"));
+                    for exp in &basic.explains {
+                        result.push(fmt.default(&format!("     * {}", exp)));
+                    }
+                }
 
-        result.push(format!(
-            "{} {} {}",
-            fmt.underline(&self.query),
-            phonetic,
-            fmt.default(
-                &translation
-                    .as_ref()
-                    .map(|v| v.join("; "))
-                    .unwrap_or_default()
-            )
-        ));
-
-        if let Some(basic) = basic {
-            if !basic.explains.is_empty() {
-                result.push(fmt.cyan("  Word Explanation:"));
-                for exp in &basic.explains {
-                    result.push(fmt.default(&format!("     * {}", exp)));
+                if !web.is_empty() {
+                    result.push(fmt.cyan("  Web Reference:"));
+                    for item in web {
+                        result.push(format!("     * {}", &fmt.yellow(&item.key)));
+                        result.push(format!(
+                            "       {}",
+                            &item
+                                .value
+                                .iter()
+                                .map(|x| fmt.purple(x))
+                                .collect::<Vec<_>>()
+                                .join("；")
+                        ));
+                    }
                 }
             }
-        }
-
-        if let Some(web) = web {
-            if !web.is_empty() {
-                result.push(fmt.cyan("  Web Reference:"));
-                for item in web {
-                    result.push(format!("     * {}", &fmt.yellow(&item.key)));
-                    result.push(format!(
-                        "       {}",
-                        &item
-                            .value
-                            .iter()
-                            .map(|x| fmt.purple(x))
-                            .collect::<Vec<_>>()
-                            .join("；")
-                    ));
-                }
+            None => {
+                result.push(fmt.red(" -- No result for this query."));
+                return result.join("\n");
             }
         }
 
@@ -218,14 +198,17 @@ impl YdResponse {
         }
 
         let resp = YdResponseInner {
-            translation: translations.first().map(|x| vec![x.to_string()]),
-            basic: Some(YdBasic {
+            translation: translations
+                .first()
+                .map(|x| vec![x.to_string()])
+                .unwrap_or_default(),
+            basic: YdBasic {
                 explains,
                 phonetic: Some(phonetic),
                 us_phonetic: None,
                 uk_phonetic: None,
-            }),
-            web: Some(webs),
+            },
+            web: webs,
         };
 
         Ok(resp)
@@ -320,18 +303,19 @@ impl YdResponse {
             translation: translations
                 .first()
                 .and_then(|x| x.split('，').next())
-                .or(translations.first().map(|x| x.as_str()))
-                .map(|x| vec![x.to_string()]),
-            basic: Some(YdBasic {
+                .or_else(|| translations.first().map(|x| x.as_str()))
+                .map(|x| vec![x.to_string()])
+                .unwrap_or_default(),
+            basic: YdBasic {
                 explains: translations_format,
                 phonetic: us_phonetic
                     .clone()
-                    .or(uk_phonetic.clone())
-                    .or(per_phone.first().map(|x| x.to_string())),
+                    .or_else(|| uk_phonetic.clone())
+                    .or_else(|| per_phone.first().map(|x| x.to_string())),
                 us_phonetic,
                 uk_phonetic,
-            }),
-            web: Some(webs),
+            },
+            web: webs,
         };
 
         Ok(resp)
@@ -340,7 +324,6 @@ impl YdResponse {
 
 // For testing
 
-use std::borrow::Cow;
 #[cfg(test)]
 use std::fmt;
 
