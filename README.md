@@ -1,19 +1,9 @@
-# ydcv-rs
+# ydcv-saki
 
-[![Build Status](https://travis-ci.org/farseerfc/ydcv-rs.svg)](https://travis-ci.org/farseerfc/ydcv-rs)
+ydcv-saki 是一个有道词典命令行客户端，由 Farseefc 老师的 [ydcv-rs](https://github.com/farseefc/ydcv-rs) fork 而来，并做了一些符合个人风格口味的修改。
 
-A rust version of [ydcv](https://github.com/felixonmars/ydcv/).
-
-# How to build
+## 编译
 
 ```bash
-cargo build
+cargo build --release
 ```
-
-# (Original) YouDao Console Version
-
-Simple wrapper for Youdao online translate (Chinese <-> English) service [API](http://fanyi.youdao.com/openapi?path=data-mode), as an alternative to the StarDict Console Version(sdcv).
-
-# License
-
-GPL-2.0
