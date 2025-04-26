@@ -1,10 +1,10 @@
 [package]
 name = "ydcv-saki"
-description = "YouDao Console Version (fork from farseefc/ydcv-rs)"
+description = "YouDao Console Version"
 repository = "https://github.com/eatradish/ydcv-saki"
 readme = "README.md"
 license = "GPL-2.0"
-version = "0.7.0"
+version = "0.7.1"
 authors = ["Jiachen Yang <farseerfc@gmail.com>", "eatradish <sakiiily@aosc.io>"]
 edition = "2024"
 
