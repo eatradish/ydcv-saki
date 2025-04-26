@@ -52,6 +52,6 @@ jobs:
       - name: Install Dependency
         run: sudo apt-get -y update &&  sudo apt-get install -y libx11-xcb-dev libdbus-1-dev libxcb-shape0-dev libxcb-xfixes0-dev
       - name: Build
-        run: cargo build
+        run: cargo build --release
       - name: Test
         run: cargo test --workspace

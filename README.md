@@ -13,6 +13,14 @@ ydcv-saki 是一款有道词典命令行客户端，由 Farseerfc 老师的 [ydc
 - 支持命令行补全生成 (`-g`/`--gneneral-completion`)
 - 支持保存查询历史，再次打开该应用会加载已保存的历史查询。
 
+## 安装
+
+可通过 [Release 页面](https://github.com/ydcv-saki/releases) 来下载相应的二进制。也可以使用 `cargo` 来安装 `ydcv-saki`:
+
+```bash
+cargo install ydcv-saki
+```
+
 ## 编译
 
 确保已经安装了 Rust 1.85+ 和 GCC/Clang，执行：
