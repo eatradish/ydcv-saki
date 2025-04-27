@@ -1,7 +1,7 @@
 //! main module of ydcv-rs
 
-use std::fs::create_dir_all;
-use std::io::{IsTerminal, stdout};
+use std::fs::{self, create_dir_all};
+use std::io::{IsTerminal, Write, stdout};
 
 use anyhow::{Context, Result};
 use clap::{ColorChoice, CommandFactory, Parser};
@@ -166,6 +166,19 @@ fn main() -> Result<()> {
             &mut plain
         };
 
+    let history_path = cache_dir()
+        .context("Failed to get cache dir path")?
+        .join("ydcv")
+        .join("history");
+
+    let history_parent = history_path.parent().unwrap();
+
+    if !history_parent.exists() {
+        create_dir_all(history_parent)?;
+    }
+
+    let mut history_file = fs::OpenOptions::new().append(true).open(&history_path);
+
     if ydcv_options.free.is_empty() {
         if selection_enabled {
             #[cfg(feature = "clipboard")]
@@ -182,21 +195,17 @@ fn main() -> Result<()> {
                         if !curr.is_empty() && last != curr {
                             last = curr.to_owned();
                             lookup_explain(&mut client, curr, fmt, ydcv_options.raw)?;
+
+                            if let Ok(ref mut history_file) = history_file {
+                                history_file.write_all(format!("{}\n", last).as_bytes())?;
+                            }
+
                             println!("Waiting for selection> ");
                         }
                     }
                 }
             }
         } else {
-            let history_path = cache_dir()
-                .context("Failed to get cache dir path")?
-                .join("ydcv")
-                .join("history");
-            let history_parent = history_path.parent().unwrap();
-            if !history_parent.exists() {
-                create_dir_all(history_parent)?;
-            }
-
             let mut reader = Editor::<(), FileHistory>::with_config(
                 Builder::new().auto_add_history(true).build(),
             )?;
@@ -220,8 +229,12 @@ fn main() -> Result<()> {
             }
         }
     } else {
-        for word in ydcv_options.free {
+        for word in &ydcv_options.free {
             lookup_explain(&mut client, word.trim(), fmt, ydcv_options.raw)?;
+        }
+
+        if let Ok(ref mut history_file) = history_file {
+            history_file.write_all(format!("{}\n", ydcv_options.free.join("\n")).as_bytes())?;
         }
     }
 
