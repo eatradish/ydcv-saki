@@ -234,7 +234,7 @@ fn main() -> Result<()> {
         }
 
         if let Ok(ref mut history_file) = history_file {
-            history_file.write_all(format!("{}\n", ydcv_options.free.join("\n")).as_bytes())?;
+            history_file.write_all(format!("{}\n", ydcv_options.free.join(" ")).as_bytes())?;
         }
     }
 
