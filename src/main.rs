@@ -5,7 +5,7 @@ use std::io::{IsTerminal, Write, stdout};
 
 use anyhow::{Context, Result};
 use clap::{ColorChoice, CommandFactory, Parser};
-use clap_complete::{Shell, generate};
+use clap_complete::CompleteEnv;
 use dirs::cache_dir;
 use log::warn;
 use reqwest::blocking::{Client, ClientBuilder};
@@ -48,9 +48,6 @@ fn lookup_explain(
 #[derive(Parser)]
 #[clap(version, about, max_term_width = 80)]
 struct YdcvOptions {
-    #[clap(short, long, help = "Generate shell completions", value_name = "SHELL")]
-    generate_completion: Option<Shell>,
-
     #[cfg(feature = "clipboard")]
     #[clap(short = 'x', long, help = "Show explanation of current selection")]
     selection: bool,
@@ -109,14 +106,10 @@ struct YdcvOptions {
 }
 
 fn main() -> Result<()> {
+    CompleteEnv::with_factory(YdcvOptions::command).complete();
     env_logger::init();
 
     let ydcv_options = YdcvOptions::parse();
-
-    if let Some(shell) = ydcv_options.generate_completion {
-        generate(shell, &mut YdcvOptions::command(), "ydcv", &mut stdout());
-        return Ok(());
-    }
 
     #[cfg(feature = "notify")]
     let notify_enabled = ydcv_options.notify;
