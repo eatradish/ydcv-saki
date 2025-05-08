@@ -1,52 +1,51 @@
-//! ydclient is client wrapper for Client
+//! ydclient is client wrapper for Client;
+
+use std::sync::LazyLock;
 
 use super::ydresponse::YdResponse;
 use anyhow::Result;
-use reqwest::blocking::Client;
-use reqwest::header::{REFERER, USER_AGENT};
-use std::io::Read;
+use nyquest::{
+    BlockingClient, ClientBuilder, Request,
+    header::{REFERER, USER_AGENT},
+};
+use url::Url;
 
-/// Wrapper trait on `reqwest::Client`
-pub trait YdClient {
-    /// lookup a word on YD and returns a `YdPreponse`
-    ///
-    /// # Examples
-    ///
-    /// lookup "hello" and compare the result:
-    ///
-    /// ```
-    /// assert_eq!("YdResponse('hello')",
-    ///        format!("{}", Client::new().lookup_word("hello").unwrap()));
-    /// ```
-    fn lookup_word(&mut self, word: &str) -> Result<YdResponse>;
+static INIT_NYQUEST: LazyLock<()> = LazyLock::new(|| {
+    nyquest_preset::register();
+});
+
+pub struct Client {
+    client: BlockingClient,
 }
 
-/// Implement wrapper client trait on `reqwest::Client`
-impl YdClient for Client {
-    /// lookup a word on YD and returns a `YdResponse`
-    #[cfg(any(feature = "native-tls", feature = "rustls"))]
-    fn lookup_word(&mut self, word: &str) -> Result<YdResponse> {
-        let body = lookup_word(word, self)?;
+impl Client {
+    pub fn new() -> Self {
+        let _ = &*INIT_NYQUEST;
+
+        Self {
+            client: ClientBuilder::default()
+                .with_header(USER_AGENT, "Mozilla/5.0 (X11; AOSC OS; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/117.0")
+                .build_blocking()
+                .unwrap(),
+        }
+    }
+
+    pub fn lookup_word(&self, word: &str) -> Result<YdResponse> {
+        let mut url = Url::parse("https://www.youdao.com/result")?;
+        url.query_pairs_mut()
+            .append_pair("word", word)
+            .append_pair("lang", "en")
+            .finish();
+
+        let body = self
+            .client
+            .request(Request::get(url.to_string()).with_header(REFERER, "https://www.youdao.com"))?
+            .text()?;
+
         let res = YdResponse::from_html(&body, word)?;
 
         Ok(res)
     }
-}
-
-fn lookup_word(word: &str, client: &Client) -> Result<String> {
-    let mut body = String::new();
-    client
-        .get("https://www.youdao.com/result")
-        .header(REFERER, "https://www.youdao.com")
-        .header(
-            USER_AGENT,
-            "Mozilla/5.0 (X11; AOSC OS; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/117.0",
-        )
-        .query(&[("word", word), ("lang", "en")])
-        .send()?
-        .read_to_string(&mut body)?;
-
-    Ok(body)
 }
 
 #[cfg(test)]

@@ -200,7 +200,6 @@ impl Formatter for HtmlFormatter {
 mod tests {
     use crate::formatters::HtmlFormatter;
     use crate::ydclient::*;
-    use reqwest::blocking::Client;
 
     #[test]
     fn test_explain_html_1() {

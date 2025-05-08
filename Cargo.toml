@@ -21,7 +21,9 @@ env_logger = "^0.11"
 rustyline = { version = "15", features = ["with-file-history"] }
 log = "^0.4"
 htmlescape = "0.3"
-reqwest = { version = "0.12", default-features = false, features = ["blocking"] }
+nyquest = { version = "0.1", features = ["blocking"], git = "https://github.com/bdbai/nyquest", rev = "b4007ff77a77bf4f922d4ebfa5347b18a00cba77" }
+nyquest-preset = { version = "0.1", features = ["blocking"], package = "nyquest-preset", git = "https://github.com/bdbai/nyquest", rev = "b4007ff77a77bf4f922d4ebfa5347b18a00cba77" }
+url = "2.5"
 scraper = "0.23"
 arboard = { version = "3.5.0", optional = true, default-features = false, features = ["wayland-data-control"] }
 anyhow = "1"
@@ -32,14 +34,11 @@ winrt-notification = { version = "^0.5", optional = true }
 
 [target.'cfg(unix)'.dependencies]
 notify-rust = { version = "^4.3", optional = true }
-zbus = { version = "^5", default-features = false, features = ["tokio"], optional = true }
 
 [features]
-default = ["notify", "clipboard", "rustls"]
-native-tls = ["reqwest/native-tls"]
-notify = ["notify-rust", "winrt-notification", "zbus"]
+default = ["notify", "clipboard"]
+notify = ["notify-rust", "winrt-notification"]
 clipboard = ["arboard"]
-rustls = ["reqwest/rustls-tls"]
 
 [profile.release-lto]
 inherits = "release"

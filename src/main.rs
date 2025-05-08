@@ -8,10 +8,10 @@ use clap::{ColorChoice, CommandFactory, Parser};
 use clap_complete::CompleteEnv;
 use dirs::cache_dir;
 use log::warn;
-use reqwest::blocking::{Client, ClientBuilder};
 use rustyline::Editor;
 use rustyline::config::Builder;
 use rustyline::history::FileHistory;
+use ydclient::Client;
 
 mod formatters;
 mod lang;
@@ -22,7 +22,6 @@ mod ydresponse;
 #[cfg(feature = "notify")]
 use crate::formatters::WinFormatter;
 use crate::formatters::{AnsiFormatter, Formatter, HtmlFormatter, PlainFormatter};
-use crate::ydclient::YdClient;
 
 fn lookup_explain(
     client: &mut Client,
@@ -126,7 +125,7 @@ fn main() -> Result<()> {
     let selection_enabled = false;
 
     // reqwest will use HTTPS_PROXY env automatically
-    let mut client = ClientBuilder::new().build()?;
+    let mut client = Client::new();
 
     let mut html = HtmlFormatter::new(notify_enabled);
     let mut ansi = AnsiFormatter::new(notify_enabled);
