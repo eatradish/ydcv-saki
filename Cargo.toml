@@ -18,7 +18,7 @@ clap_complete = { version = "4.5", features = ["unstable-dynamic"] }
 serde = { version = "^1.0", features = ["derive"] }
 serde_json = "^1.0"
 env_logger = "^0.11"
-rustyline = { version = "15", features = ["with-file-history"] }
+rustyline = { version = "16", features = ["with-file-history"] }
 log = "^0.4"
 htmlescape = "0.3"
 reqwest = { version = "0.12", default-features = false, features = ["blocking"] }
