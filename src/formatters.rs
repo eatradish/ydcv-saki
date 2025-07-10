@@ -45,7 +45,7 @@ impl Formatter for PlainFormatter {
     plain!(default, red, yellow, purple, cyan, underline);
 
     fn print(&mut self, _: &str, body: &str) {
-        println!("{}", body);
+        println!("{body}");
     }
 }
 
@@ -117,7 +117,7 @@ impl Formatter for AnsiFormatter {
     }
 
     fn print(&mut self, _: &str, body: &str) {
-        println!("{}", body);
+        println!("{body}");
     }
 }
 
@@ -186,7 +186,7 @@ impl Formatter for HtmlFormatter {
                 .show()
                 .unwrap();
         } else {
-            println!("{}", body);
+            println!("{body}");
         }
     }
 

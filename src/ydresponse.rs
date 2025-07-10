@@ -114,7 +114,7 @@ impl YdResponse {
                 if !basic.explains.is_empty() {
                     result.push(fmt.cyan("  Word Explanation:"));
                     for exp in &basic.explains {
-                        result.push(fmt.default(&format!("     * {}", exp)));
+                        result.push(fmt.default(&format!("     * {exp}")));
                     }
                 }
 
@@ -264,7 +264,7 @@ impl YdResponse {
             .enumerate()
             .map(|(i, c)| {
                 if let Some(pos) = poss.get(i) {
-                    format!("{} {c}", pos)
+                    format!("{pos} {c}")
                 } else {
                     c.to_string()
                 }

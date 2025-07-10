@@ -38,7 +38,7 @@ fn lookup_explain(
                 let exp = result.explain(fmt);
                 fmt.print(word, &exp);
             }
-            Err(err) => fmt.print(word, &format!("Error looking-up word {}: {:?}", word, err)),
+            Err(err) => fmt.print(word, &format!("Error looking-up word {word}: {err:?}")),
         }
     }
 
@@ -190,7 +190,7 @@ fn main() -> Result<()> {
                             lookup_explain(&mut client, curr, fmt, ydcv_options.raw)?;
 
                             if let Ok(ref mut history_file) = history_file {
-                                history_file.write_all(format!("{}\n", last).as_bytes())?;
+                                history_file.write_all(format!("{last}\n").as_bytes())?;
                             }
 
                             println!("Waiting for selection> ");
