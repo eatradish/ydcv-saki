@@ -144,7 +144,7 @@ impl YdResponse {
     }
 
     /// Lookup words by Chinese meaning.
-    fn zh2en(html: &Html) -> Result<YdResponseInner, SelectorErrorKind> {
+    fn zh2en(html: &Html) -> Result<YdResponseInner, SelectorErrorKind<'_>> {
         let trans = Selector::parse(".basic .col2 .word-exp .point")?;
         let mut translations = vec![];
         html.select(&trans).for_each(|x| {
@@ -215,7 +215,7 @@ impl YdResponse {
     }
 
     /// Lookup words by English word.
-    fn en2zh(html: &Html) -> Result<YdResponseInner, SelectorErrorKind> {
+    fn en2zh(html: &Html) -> Result<YdResponseInner, SelectorErrorKind<'_>> {
         let mut per_phone = vec![];
         let phonetic = Selector::parse(".phone_con .per-phone")?;
         html.select(&phonetic).for_each(|x| {

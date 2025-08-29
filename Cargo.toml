@@ -15,24 +15,24 @@ path = "./src/main.rs"
 [dependencies]
 clap = { version = "4", features = ["derive"] }
 clap_complete = { version = "4.5", features = ["unstable-dynamic"] }
-serde = { version = "^1.0", features = ["derive"] }
-serde_json = "^1.0"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
 env_logger = "^0.11"
-rustyline = { version = "16", features = ["with-file-history"] }
-log = "^0.4"
+rustyline = { version = "17", features = ["with-file-history"] }
+log = "0.4"
 htmlescape = "0.3"
 reqwest = { version = "0.12", default-features = false, features = ["blocking"] }
-scraper = "0.23"
+scraper = "0.24"
 arboard = { version = "3.5.0", optional = true, default-features = false, features = ["wayland-data-control"] }
 anyhow = "1"
 dirs = "6.0.0"
 
 [target.'cfg(windows)'.dependencies]
-winrt-notification = { version = "^0.5", optional = true }
+winrt-notification = { version = "0.5", optional = true }
 
 [target.'cfg(unix)'.dependencies]
-notify-rust = { version = "^4.3", optional = true }
-zbus = { version = "^5", default-features = false, features = ["tokio"], optional = true }
+notify-rust = { version = "4.3", optional = true }
+zbus = { version = "5", default-features = false, features = ["tokio"], optional = true }
 
 [features]
 default = ["notify", "clipboard", "rustls"]
