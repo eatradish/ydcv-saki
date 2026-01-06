@@ -2,6 +2,7 @@
 
 use std::fs::{self, create_dir_all};
 use std::io::{IsTerminal, Write, stdout};
+use std::sync::LazyLock;
 
 use anyhow::{Context, Result};
 use clap::{ColorChoice, CommandFactory, Parser};
@@ -24,8 +25,18 @@ use crate::formatters::WinFormatter;
 use crate::formatters::{AnsiFormatter, Formatter, HtmlFormatter, PlainFormatter};
 use crate::ydclient::YdClient;
 
+static CLIENT: LazyLock<Client> = LazyLock::new(|| {
+    #[cfg(feature = "rustls")]
+    rustls::crypto::ring::default_provider()
+        .install_default()
+        .expect("Failed to install rustls crypto provider");
+
+    // reqwest will use HTTPS_PROXY env automatically
+    ClientBuilder::new().build().expect("Failed to create http client")
+});
+
 fn lookup_explain(
-    client: &mut Client,
+    client: &Client,
     word: &str,
     fmt: &mut dyn Formatter,
     raw: bool,
@@ -125,14 +136,6 @@ fn main() -> Result<()> {
     #[cfg(not(feature = "clipboard"))]
     let selection_enabled = false;
 
-    #[cfg(feature = "rustls")]
-    rustls::crypto::ring::default_provider()
-        .install_default()
-        .expect("Failed to install rustls crypto provider");
-
-    // reqwest will use HTTPS_PROXY env automatically
-    let mut client = ClientBuilder::new().build()?;
-
     let mut html = HtmlFormatter::new(notify_enabled);
     let mut ansi = AnsiFormatter::new(notify_enabled);
     let mut plain = PlainFormatter::new(notify_enabled);
@@ -192,7 +195,7 @@ fn main() -> Result<()> {
                         let curr = curr.trim_matches('\u{0}').trim();
                         if !curr.is_empty() && last != curr {
                             last = curr.to_owned();
-                            lookup_explain(&mut client, curr, fmt, ydcv_options.raw)?;
+                            lookup_explain(&CLIENT, curr, fmt, ydcv_options.raw)?;
 
                             if let Ok(ref mut history_file) = history_file {
                                 history_file.write_all(format!("{last}\n").as_bytes())?;
@@ -218,7 +221,7 @@ fn main() -> Result<()> {
             while let Ok(w) = reader.readline("> ") {
                 let word = w.trim();
                 if !word.is_empty() {
-                    lookup_explain(&mut client, word, fmt, ydcv_options.raw)?;
+                    lookup_explain(&CLIENT, word, fmt, ydcv_options.raw)?;
                 }
                 reader
                     .save_history(&history_path)
@@ -228,7 +231,7 @@ fn main() -> Result<()> {
         }
     } else {
         for word in &ydcv_options.free {
-            lookup_explain(&mut client, word.trim(), fmt, ydcv_options.raw)?;
+            lookup_explain(&CLIENT, word.trim(), fmt, ydcv_options.raw)?;
         }
 
         if let Ok(ref mut history_file) = history_file {
