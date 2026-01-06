@@ -22,6 +22,7 @@ rustyline = { version = "17", features = ["with-file-history"] }
 log = "0.4"
 htmlescape = "0.3"
 reqwest = { version = "0.13", default-features = false, features = ["blocking", "query"] }
+rustls = { version = "0.23", default-features = false, features = ["ring", "tls12"], optional = true }
 scraper = "0.25"
 arboard = { version = "3.5.0", optional = true, default-features = false, features = ["wayland-data-control"] }
 anyhow = "1"
@@ -39,7 +40,7 @@ default = ["notify", "clipboard", "rustls"]
 native-tls = ["reqwest/native-tls"]
 notify = ["notify-rust", "winrt-notification", "zbus"]
 clipboard = ["arboard"]
-rustls = ["reqwest/default-tls"]
+rustls = ["reqwest/rustls-no-provider", "dep:rustls"]
 
 [profile.release-lto]
 inherits = "release"

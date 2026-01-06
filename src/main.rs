@@ -125,6 +125,11 @@ fn main() -> Result<()> {
     #[cfg(not(feature = "clipboard"))]
     let selection_enabled = false;
 
+    #[cfg(feature = "rustls")]
+    rustls::crypto::ring::default_provider()
+        .install_default()
+        .expect("Failed to install rustls crypto provider");
+
     // reqwest will use HTTPS_PROXY env automatically
     let mut client = ClientBuilder::new().build()?;
 
