@@ -32,15 +32,12 @@ static CLIENT: LazyLock<Client> = LazyLock::new(|| {
         .expect("Failed to install rustls crypto provider");
 
     // reqwest will use HTTPS_PROXY env automatically
-    ClientBuilder::new().build().expect("Failed to create http client")
+    ClientBuilder::new()
+        .build()
+        .expect("Failed to create http client")
 });
 
-fn lookup_explain(
-    client: &Client,
-    word: &str,
-    fmt: &mut dyn Formatter,
-    raw: bool,
-) -> Result<()> {
+fn lookup_explain(client: &Client, word: &str, fmt: &mut dyn Formatter, raw: bool) -> Result<()> {
     if raw {
         println!("{}", serde_json::to_string(&client.lookup_word(word)?)?);
     } else {
