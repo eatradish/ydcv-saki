@@ -18,14 +18,14 @@ pub trait YdClient {
     /// assert_eq!("YdResponse('hello')",
     ///        format!("{}", Client::new().lookup_word("hello").unwrap()));
     /// ```
-    fn lookup_word(&mut self, word: &str) -> Result<YdResponse>;
+    fn lookup_word(&self, word: &str) -> Result<YdResponse>;
 }
 
 /// Implement wrapper client trait on `reqwest::Client`
 impl YdClient for Client {
     /// lookup a word on YD and returns a `YdResponse`
     #[cfg(any(feature = "native-tls", feature = "rustls"))]
-    fn lookup_word(&mut self, word: &str) -> Result<YdResponse> {
+    fn lookup_word(&self, word: &str) -> Result<YdResponse> {
         let body = lookup_word(word, self)?;
         let res = YdResponse::from_html(&body, word)?;
 
@@ -51,13 +51,15 @@ fn lookup_word(word: &str, client: &Client) -> Result<String> {
 
 #[cfg(test)]
 mod tests {
+    use crate::CLIENT;
+
     use super::*;
 
     #[test]
     fn test_lookup_word_0() {
         assert_eq!(
             "YdResponse('hello')",
-            format!("{}", Client::new().lookup_word("hello").unwrap())
+            format!("{}", CLIENT.lookup_word("hello").unwrap())
         );
     }
 
@@ -65,7 +67,7 @@ mod tests {
     fn test_lookup_word_1() {
         assert_eq!(
             "YdResponse('world')",
-            format!("{}", Client::new().lookup_word("world").unwrap())
+            format!("{}", CLIENT.lookup_word("world").unwrap())
         );
     }
 
@@ -73,7 +75,7 @@ mod tests {
     fn test_lookup_word_2() {
         assert_eq!(
             "YdResponse('<+*>?_')",
-            format!("{}", Client::new().lookup_word("<+*>?_").unwrap())
+            format!("{}", CLIENT.lookup_word("<+*>?_").unwrap())
         );
     }
 }
